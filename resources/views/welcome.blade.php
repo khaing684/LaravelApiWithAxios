@@ -40,6 +40,7 @@
                 <input type="text"name="title" class="form-control">
                 <span id="titleError"></span>
             </div>
+          
             <div class="form-group">
                 <label for="">Description</label>
                 <textarea name="description" id="" class="form-control" rows="5">
@@ -54,7 +55,37 @@
     </div>
   </div>
     
+    <!-- Modal -->
+  <!-- Only one Edit Modal -->
+<div class="modal fade" id="EditModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Edit Post</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="editForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Title</label>
+            <input type="text" name="title" class="form-control">
+            <span id="titleError"></span>
+          </div>
 
+          <div class="form-group mt-3">
+            <label>Description</label>
+            <textarea name="description" class="form-control" rows="5"></textarea>
+            <span id="descError"></span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Update</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
 
     {{-- js --}}
@@ -73,7 +104,7 @@
                     '<td>'+item.title+'</td>'+
                     '<td>'+item.description+'</td>'+
                     '<td>'+
-                        '<button class="btn btn-success">Edit</button>'+
+                        '<button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#EditModal" onclick="Editclick('+item.id+')">Edit</button>'+
                        '<button class="btn btn-danger ml-2">Delete</button>'+
                        '</td>'+
                     '</tr>';
@@ -93,28 +124,45 @@
 
         axios.post('/api/posts',{
             title: titleInput.value,
-            description: descriptionInput.value,
+            description: descriptionInput.value
         })
             .then(response=> {
                 console.log(response.data)
                 if(response.data.msg == 'created is succefully'){
-                    document.getElementById('success').innerHTML ='<div class="alert alert-warning alert-dismissible fade show" role="alert"><strong>'+response.data.msg+'</strong> You should check in on some of those fields below.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span> </button></div>'
+                    document.getElementById('success').innerHTML ='<div class="alert alert-warning alert-dismissible fade show" role="alert"><strong>'+response.data.msg+'</strong> You should check in on some of those fields below.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span> </button></div>';
+
+                    myForm.reset();
                 }else{
-                   if(titleInput.value == ''){
-                     document.getElementById('titleError').innerHTML='<i class="text-danger">'+response.data.msg.title+'</i>';
-                   }
-                   if(descriptionInput.value == ''){
-                    document.getElementById('descError').innerHTML='<i class="text-danger">'+response.data.msg.description+'</i>';
-                   }
+                var titleError = document.getElementById('titleError');
+                var descError = document.getElementById('descError');
+                 
+                titleError.innerHTML = titleInput.value == '' ? '<i class="text-danger">'+response.data.msg.title +'</i>' : '';
+
+                descError.innerHTML = descriptionInput.value == '' ? '<i class="text-danger">'+response.data.msg.description+'</i>' : '';     
                      
                 }
                 
                 
             })
             .catch(error=>console.log(error));
-        // console.log(titleInput.value);
-        // console.log(descriptionInput.value);
+       
        }
+       //update
+
+       var editForm = document.forms['editForm'];
+       var editTitleInput = editForm['title'];
+       var editdescInput = editForm['description'];
+
+       function Editclick(postId){
+       axios.get('api/posts/'+postId)
+            .then(response => {
+                console.log(response.data.title, response.data.description);
+                editTitleInput.value = response.data.title;
+                editdescInput.value = response.data.description;
+            })
+            .catch(error => console.log(error));
+       }
+
 
        
     </script>

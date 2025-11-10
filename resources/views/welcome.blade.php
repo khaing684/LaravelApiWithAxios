@@ -15,6 +15,7 @@
 <body>
   <div class="container">
     <h4>Posts</h4>
+    <span id="successMsg"></span>
     <div class="row">
         <div class="col-md-8">
             <table class="table table-bordered table-hover">
@@ -80,7 +81,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Update</button>
+          <button type="submit" class="btn btn-primary">Update</button>
         </div>
       </form>
     </div>
@@ -114,7 +115,7 @@
        .catch(error=> console.log(error));
 
 
-       //post
+       //create
        var myForm =document.forms['myForm'];
        var titleInput = myForm['title'];
        var descriptionInput = myForm['description'];
@@ -129,7 +130,7 @@
             .then(response=> {
                 console.log(response.data)
                 if(response.data.msg == 'created is succefully'){
-                    document.getElementById('success').innerHTML ='<div class="alert alert-warning alert-dismissible fade show" role="alert"><strong>'+response.data.msg+'</strong> You should check in on some of those fields below.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span> </button></div>';
+                    document.getElementById('success').innerHTML ='<div class="alert alert-warning alert-dismissible fade show" role="alert"><strong>'+response.data.msg+'</strong><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span> </button></div>';
 
                     myForm.reset();
                 }else{
@@ -147,13 +148,15 @@
             .catch(error=>console.log(error));
        
        }
-       //update
+       //Edit 
 
        var editForm = document.forms['editForm'];
        var editTitleInput = editForm['title'];
        var editdescInput = editForm['description'];
+       var postIdToUpdate;
 
        function Editclick(postId){
+        postIdToUpdate = postId;
        axios.get('api/posts/'+postId)
             .then(response => {
                 console.log(response.data.title, response.data.description);
@@ -163,6 +166,22 @@
             .catch(error => console.log(error));
        }
 
+       //update
+
+       editForm.onsubmit = function(event){
+        event.preventDefault();
+        axios.put('api/posts/'+postIdToUpdate,{
+          title: editTitleInput.value,
+          description: editdescInput.value,
+        })
+            .then(response => {
+              console.log(response.data.msg);
+              document.getElementById('successMsg').innerHTML = '<div class="alert alert-warning alert-dismissible fade show" role="alert"><strong>'+response.data.msg+'</strong><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span> </button></div>';
+            })
+              .catch(error => console.log(error));
+            
+        
+       }
 
        
     </script>

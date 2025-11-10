@@ -66,7 +66,9 @@ class PostController extends Controller
             'description'=> $request->description
         ]);
 
-        return response()->json($posts,['msg'=> 'update successfully']);
+        return response()->json(['msg'=> 'update successfully',
+        'post'=> $posts ], 200
+    );
     }
 
     /**

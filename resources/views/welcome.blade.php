@@ -65,7 +65,7 @@
         <h1 class="modal-title fs-5" id="exampleModalLabel">Edit Post</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form id="editForm">
+      <form name="editForm" id="editForm">
         <div class="modal-body">
           <div class="form-group">
             <label>Title</label>
@@ -175,8 +175,14 @@
           description: editdescInput.value,
         })
             .then(response => {
-              console.log(response.data.msg);
+              // console.log(response.data.msg);
               document.getElementById('successMsg').innerHTML = '<div class="alert alert-warning alert-dismissible fade show" role="alert"><strong>'+response.data.msg+'</strong><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span> </button></div>';
+              // $('#EditModal').modal('hide')
+
+              let modalEl = document.getElementById('EditModal');
+              let modal = bootstrap.Modal.getInstance(modalEl);
+              modal.hide();
+
             })
               .catch(error => console.log(error));
             

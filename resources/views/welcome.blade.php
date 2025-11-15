@@ -22,7 +22,7 @@
                 <thead>
                     <tr>
                         <th>Id</th>
-                        <th>Name</th>
+                        <th>Title</th>
                         <th>Description</th>
                         <th>Action</th>
                     </tr>
@@ -94,21 +94,16 @@
     {{-- Axios --}}
   <script src="https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.min.js"></script>
     <script>
+      var tablebody = document.getElementById('tablebody');
+      var titleList = document.getElementsByClassName('titleList');
+      var descList = document.getElementsByClassName('descList');
+      
         //get
        axios.get('/api/posts')
        .then(response =>{
-        var tablebody = document.getElementById('tablebody');
        response.data.forEach(item=>{
-        tablebody.innerHTML += 
-                    '<tr>'+
-                    '<td>'+item.id+'</td>'+
-                    '<td>'+item.title+'</td>'+
-                    '<td>'+item.description+'</td>'+
-                    '<td>'+
-                        '<button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#EditModal" onclick="Editclick('+item.id+')">Edit</button>'+
-                       '<button class="btn btn-danger ml-2">Delete</button>'+
-                       '</td>'+
-                    '</tr>';
+        displayData(item);
+     
        });
        console.log(response.data);
     })
@@ -128,11 +123,13 @@
             description: descriptionInput.value
         })
             .then(response=> {
-                console.log(response.data)
+                console.log(response.data);
                 if(response.data.msg == 'created is succefully'){
-                    document.getElementById('success').innerHTML ='<div class="alert alert-warning alert-dismissible fade show" role="alert"><strong>'+response.data.msg+'</strong><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span> </button></div>';
-
+                alertMsg(response.data.msg);
                     myForm.reset();
+                    displayData(response.data[0]);
+
+                    
                 }else{
                 var titleError = document.getElementById('titleError');
                 var descError = document.getElementById('descError');
@@ -154,14 +151,17 @@
        var editTitleInput = editForm['title'];
        var editdescInput = editForm['description'];
        var postIdToUpdate;
+       var oldTitle;
 
-       function Editclick(postId){
+       function editBtn(postId){
         postIdToUpdate = postId;
        axios.get('api/posts/'+postId)
             .then(response => {
                 console.log(response.data.title, response.data.description);
                 editTitleInput.value = response.data.title;
                 editdescInput.value = response.data.description;
+
+                oldTitle = response.data.title;
             })
             .catch(error => console.log(error));
        }
@@ -175,13 +175,21 @@
           description: editdescInput.value,
         })
             .then(response => {
-              // console.log(response.data.msg);
-              document.getElementById('successMsg').innerHTML = '<div class="alert alert-warning alert-dismissible fade show" role="alert"><strong>'+response.data.msg+'</strong><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span> </button></div>';
-              // $('#EditModal').modal('hide')
-
+          alertMsg(response.data.msg);
               let modalEl = document.getElementById('EditModal');
               let modal = bootstrap.Modal.getInstance(modalEl);
               modal.hide();
+
+              let row = document.getElementById("row_" + postIdToUpdate);
+
+       
+              for(var i=0; i<titleList.length; i++){
+                if(titleList[i].innerHTML == oldTitle){
+                  titleList[i].innerHTML = editTitleInput.value;
+                  descList[i].innerHTML = editdescInput.value;
+                } 
+
+              }
 
             })
               .catch(error => console.log(error));
@@ -189,6 +197,37 @@
         
        }
 
+       //delete
+       function deleteBtn(postId){
+       axios.delete('api/posts/'+postId)
+            .then(response=>{
+              
+              alertMsg(response.data.msg);
+            })
+            .catch(error=> console.log(error));
+
+       }
+
+       //helper functions
+     function displayData(data){
+     tablebody.innerHTML += 
+        '<tr id="row_'+data.id+'">'+
+            '<td>'+data.id+'</td>'+
+            '<td class="titleList">'+data.title+'</td>'+
+            '<td class="descList">'+data.description+'</td>'+
+            '<td>'+
+                '<button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#EditModal" onclick="editBtn('+data.id+')">Edit</button>'+
+                '<button class="btn btn-danger ml-2" onclick="deleteBtn('+data.id+')">Delete</button>'+
+            '</td>'+
+        '</tr>';
+}
+
+      function alertMsg(Msg){
+          document.getElementById('successMsg').innerHTML = '<div class="alert alert-warning alert-dismissible fade show" role="alert"><strong>'+Msg+'</strong><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span> </button></div>';
+    }
+
+
+       
        
     </script>
 </body>

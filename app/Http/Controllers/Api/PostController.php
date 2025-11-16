@@ -37,7 +37,7 @@ class PostController extends Controller
             'description'=>$request->description,
         ]);
 
-       return response()->json([$posts,'msg'=> 'created is succefully']);
+       return response()->json(['post'=> $posts,'msg'=> 'created is succefully']);
         }else{
              return response()->json(['msg'=> $validator->errors() ]);
         }
@@ -78,6 +78,6 @@ class PostController extends Controller
     {
         $posts =Post::find($id);
         $posts->delete();
-         return response()->json(['msg'=> 'delete successfully']);
+         return response()->json(['deletedPost'=>$posts,'msg'=> 'delete successfully']);
     }
 }

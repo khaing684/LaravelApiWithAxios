@@ -44,7 +44,7 @@
           
             <div class="form-group">
                 <label for="">Description</label>
-                <textarea name="description" id="" class="form-control" rows="5">
+                <textarea name="description"  class="form-control" rows="5">
                    
                 </textarea>
                  <span id="descError"></span>
@@ -97,6 +97,8 @@
       var tablebody = document.getElementById('tablebody');
       var titleList = document.getElementsByClassName('titleList');
       var descList = document.getElementsByClassName('descList');
+      var idList = document.getElementsByClassName('idList');
+      var btnList = document.getElementsByClassName('btnList');
       
         //get
        axios.get('/api/posts')
@@ -123,17 +125,17 @@
             description: descriptionInput.value
         })
             .then(response=> {
-                console.log(response.data);
-                if(response.data.msg == 'created is succefully'){
-                alertMsg(response.data.msg);
-                    myForm.reset();
-                    displayData(response.data[0]);
-
-                    
-                }else{
                 var titleError = document.getElementById('titleError');
                 var descError = document.getElementById('descError');
                  
+                if(response.data.msg == 'created is succefully'){
+                alertMsg(response.data.msg);
+                    myForm.reset();
+                    displayData(response.data.post);
+                   titleError.innerHTML = descError.innerHTML ='';
+                    
+                }else{
+               
                 titleError.innerHTML = titleInput.value == '' ? '<i class="text-danger">'+response.data.msg.title +'</i>' : '';
 
                 descError.innerHTML = descriptionInput.value == '' ? '<i class="text-danger">'+response.data.msg.description+'</i>' : '';     
@@ -150,18 +152,18 @@
        var editForm = document.forms['editForm'];
        var editTitleInput = editForm['title'];
        var editdescInput = editForm['description'];
-       var postIdToUpdate;
-       var oldTitle;
+       var postIdToUpdate, oldTitle;
+        
 
        function editBtn(postId){
         postIdToUpdate = postId;
        axios.get('api/posts/'+postId)
             .then(response => {
                 console.log(response.data.title, response.data.description);
-                editTitleInput.value = response.data.title;
+                editTitleInput.value = oldTitle = response.data.title;
                 editdescInput.value = response.data.description;
 
-                oldTitle = response.data.title;
+               
             })
             .catch(error => console.log(error));
        }
@@ -199,12 +201,22 @@
 
        //delete
        function deleteBtn(postId){
-       axios.delete('api/posts/'+postId)
+       if(confirm('Do u want to delete?')){
+        axios.delete('api/posts/'+postId)
             .then(response=>{
-              
+              console.log(response.data.deletedPost.title);
               alertMsg(response.data.msg);
+              for(var i=0; i<titleList.length; i++){
+                if(titleList[i].innerHTML == response.data.deletedPost.title){
+                  idList[i].style.display = titleList[i].style.display = descList[i].style.display = btnList[i].style.display = 'none';
+                  
+                  
+
+                }
+              }
             })
             .catch(error=> console.log(error));
+       }
 
        }
 
@@ -212,10 +224,10 @@
      function displayData(data){
      tablebody.innerHTML += 
         '<tr id="row_'+data.id+'">'+
-            '<td>'+data.id+'</td>'+
+            '<td class="idList">'+data.id+'</td>'+
             '<td class="titleList">'+data.title+'</td>'+
             '<td class="descList">'+data.description+'</td>'+
-            '<td>'+
+            '<td class="btnList">'+
                 '<button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#EditModal" onclick="editBtn('+data.id+')">Edit</button>'+
                 '<button class="btn btn-danger ml-2" onclick="deleteBtn('+data.id+')">Delete</button>'+
             '</td>'+
